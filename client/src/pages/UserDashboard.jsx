@@ -17,11 +17,11 @@ export default function UserDashboard() {
                     return;
                 }
 
-                const res = await axios.get(`${API_URL}users/user/dashboard`, {
+                const res = await axios.get(`${API_URL}/users/user/dashboard`, {
                     headers: {Authorization: `Bearer ${token}`},
                 });
 
-                setEvents(res.data);//backend returns registered events
+                setEvents(res.data.registeredEvents);//backend returns registered events
             } catch (err) {
                 setError(err.response?.data?.error || "Failed to load user dashboard");
             }
@@ -38,7 +38,11 @@ export default function UserDashboard() {
                 <ul className="list-group">
                     {events.map((event)=>(
                         <li key={event.id} className="list-group-item">
-                            <strong>{event.title}</strong> - {event.date}
+                            <strong>{event.title}</strong> - {new Date(event.date).toLocaleDateString('en-GB',{
+                                day: "numeric",
+                                month:"long",
+                                year: "numeric"
+                            })}
                         </li>
                     ))}
                 </ul>
