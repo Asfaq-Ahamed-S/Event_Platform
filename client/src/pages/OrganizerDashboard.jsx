@@ -60,6 +60,24 @@ export default function UserDashboard() {
             setError(err.response?.data?.error || "Failed to create event");
         }
     };
+
+    //Handle Event Deletion
+    const handleDeleteEvent = async (id) => {
+        try {
+            const API_URL = import.meta.env.VITE_API_URL;
+            const token = localStorage.getItem("token");
+
+            const res = await axios.delete(
+                `${API_URL}/events/${id}`,
+                {headers: {Authorization: `Bearer ${token}`}}
+            );
+
+            //Remove from State
+            setEvents(events.filter((event) => event._id != id));
+        } catch (err) {
+            setError(err.response?.data?.error || "Failed to delete event");
+        }
+    };
     
     return (
         <div className="container mt-5">
@@ -110,12 +128,19 @@ export default function UserDashboard() {
             {events.length > 0 ? (
                 <ul className="list-group">
                     {events.map((event)=>(
-                        <li key={event.id || event._id || index} className="list-group-item">
-                            <strong>{event.title}</strong> - {new Date(event.date).toLocaleDateString("en-GB",{
+                        <li key={event.id || event._id} className="list-group-item">
+                            <div>
+                                <strong>{event.title}</strong>
+                                <br />
+                                {new Date(event.date).toLocaleDateString("en-GB",{
                                 day: "numeric",
                                 month: "long",
                                 year: "numeric",
-                            })}
+                                })} - {event.location}
+                            </div>
+                            <button className="btn btn-danger btn-sm" onClick={()=> handleDeleteEvent(event._id)}>
+                                Delete
+                            </button>
                         </li>
                     ))}
                 </ul>
