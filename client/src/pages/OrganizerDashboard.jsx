@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function UserDashboard() {
+export default function OrganizerDashboard() {
     //State variables
     const [events, setEvents] = useState([]);
     const [error, setError] = useState("");
@@ -10,6 +10,13 @@ export default function UserDashboard() {
     const [location, setLocation] = useState("");
     const [showForm, setShowForm] = useState(false); //toggle form visibilty
 
+    //Edit states
+    const [editingEvent, setEditingEvent] = useState(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDate, setEditDate] = useState("");
+    const [editLocation, setEditLocation] = useState("");
+
+    //Fetch events
     useEffect(()=> {
         const fetchOrganizerEvents = async () => {
             try {
@@ -78,6 +85,34 @@ export default function UserDashboard() {
             setError(err.response?.data?.error || "Failed to delete event");
         }
     };
+
+    //Start editing
+    const startEdit =(event) => {
+        setEditingEvent(event._id);
+        setEditTitle(event.title);
+        setEditDate(event.date.slice(0, 10)); //format YYYY-MM-DD
+        setEditLocation(event.location);
+    };
+
+    //Handle event update
+    const handleUpdateEvent = async (e) => {
+        e.preventDefault();
+        try {
+            const API_URL = import.meta.env.VITE_API_URL;
+            const token = localStorage.getItem("token");
+
+            const res = await axios.put(
+                `${API_URL}/events/${editingEvent}`,
+                {title: editTitle, date: editDate, location: editLocation},
+                {headers: {Authorization: `Bearer ${token}`}}
+            );
+
+            setEvents(events.map(ev => ev._id === editingEvent? res.data : ev))
+            setEditingEvent(null);
+        } catch (err) {
+            setError(err.response?.data?.error || "Failed to update event");
+        }
+    };
     
     return (
         <div className="container mt-5">
@@ -129,18 +164,31 @@ export default function UserDashboard() {
                 <ul className="list-group">
                     {events.map((event)=>(
                         <li key={event.id || event._id} className="list-group-item">
-                            <div>
-                                <strong>{event.title}</strong>
-                                <br />
-                                {new Date(event.date).toLocaleDateString("en-GB",{
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                                })} - {event.location}
-                            </div>
-                            <button className="btn btn-danger btn-sm" onClick={()=> handleDeleteEvent(event._id)}>
-                                Delete
-                            </button>
+                            {editingEvent === event._id ? (
+                                <form onSubmit={handleUpdateEvent}>
+                                    <input type="text" value={editTitle} onChange={(e) => setEditTitle(e.target.value)} required />
+                                    <input type="date" value={editDate} onChange={(e) => setEditDate(e.target.value)} required />
+                                    <input type="text" value={editLocation} onChange={(e) => setEditLocation(e.target.value)} required />
+                                    <button type="submit" className="btn btn-primary btn-sm">Save</button>
+                                    <button type="button" className="btn btn-secondary btn-sm ms-2" onClick={()=> setEditingEvent(null)}>Cancel</button>
+                                </form>
+                            ):(
+                                <div className="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>{event.title}</strong>
+                                        <br />
+                                        {new Date(event.date).toLocaleDateString("en-GB",{
+                                            day: "numeric",
+                                            month: "long",
+                                            year: "numeric",
+                                        })} - {event.location}
+                                    </div>
+                                    <div>
+                                        <button className="btn btn-warning btn-sm me-2" onClick={()=> startEdit(event)}>Edit</button>
+                                        <button className="btn btn-danger btn-sm" onClick={()=> handleDeleteEvent(event._id)}>Delete</button>
+                                    </div>
+                                </div>
+                            )} 
                         </li>
                     ))}
                 </ul>
