@@ -17,6 +17,17 @@ export default function OrganizerDashboard() {
     const [editDate, setEditDate] = useState("");
     const [editLocation, setEditLocation] = useState("");
 
+    //Auto-hide alerts
+    useEffect(() => {
+        if (error || success) {
+            const timer = setTimeout(() => {
+                setError("");
+                setSuccess("");
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, success]);
+
     //Fetch events
     useEffect(()=> {
         const fetchOrganizerEvents = async () => {
