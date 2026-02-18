@@ -5,6 +5,7 @@ export default function OrganizerDashboard() {
     //State variables
     const [events, setEvents] = useState([]);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [title, setTitle] = useState("");
     const [date, setDate] = useState("");
     const [location, setLocation] = useState("");
@@ -54,16 +55,14 @@ export default function OrganizerDashboard() {
                 {headers: {Authorization: `Bearer ${token}`}}
             );
 
-            console.log("Create Event response:", res.data);
-
             //Add new event to state instantly
             setEvents([...events, res.data]); //backend returns the event directly
             setTitle("");
             setDate("");
             setLocation("");
             setShowForm(false); //hide form after creation
+            setSuccess("Event created successfully!");
         } catch (err) {
-            console.log(err.response?.data);
             setError(err.response?.data?.error || "Failed to create event");
         }
     };
@@ -81,6 +80,7 @@ export default function OrganizerDashboard() {
 
             //Remove from State
             setEvents(events.filter((event) => event._id != id));
+            setSuccess("Event deleted successfully!");
         } catch (err) {
             setError(err.response?.data?.error || "Failed to delete event");
         }
@@ -109,6 +109,7 @@ export default function OrganizerDashboard() {
 
             setEvents(events.map(ev => ev._id === editingEvent? res.data : ev))
             setEditingEvent(null);
+            setSuccess("Event updated successfully!");
         } catch (err) {
             setError(err.response?.data?.error || "Failed to update event");
         }
@@ -118,6 +119,7 @@ export default function OrganizerDashboard() {
         <div className="container mt-5">
             <h2 className="mb-3">Organizer Dashboard</h2>
             {error && <div className="alert alert-danger">{error}</div>}
+            {success && <div className="alert alert-success">{success}</div>}
 
             {/* Toggle button */}
             {!showForm && (
