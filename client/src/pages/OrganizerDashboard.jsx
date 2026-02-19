@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function OrganizerDashboard() {
     //State variables
@@ -10,6 +11,7 @@ export default function OrganizerDashboard() {
     const [date, setDate] = useState("");
     const [location, setLocation] = useState("");
     const [showForm, setShowForm] = useState(false); //toggle form visibilty
+    const navigate = useNavigate();
 
     //Edit states
     const [editingEvent, setEditingEvent] = useState(null);
@@ -199,6 +201,7 @@ export default function OrganizerDashboard() {
                                     <div>
                                         <button className="btn btn-warning btn-sm me-2" onClick={()=> startEdit(event)}>Edit</button>
                                         <button className="btn btn-danger btn-sm" onClick={()=> handleDeleteEvent(event._id)}>Delete</button>
+                                        <button className="btn btn-info btn-sm ms-2" onClick={()=> navigate(`/events/${event._id}`)}>View Details</button>
                                     </div>
                                 </div>
                             )} 
